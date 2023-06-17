@@ -1,6 +1,6 @@
 # Blog Project
 
-This is a blog project created as part of an interview task. The project is a simple blogging application that allows users to create, read, update, and delete blog posts.
+This is a blog project created as part of an interview task. The project is a simple blogging application that allows users to read, update, and delete blog posts.
 
 
 ## Technologies Used
