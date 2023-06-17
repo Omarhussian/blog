@@ -2,6 +2,7 @@ import React, { useState , useContext } from "react";
 import { TrashIcon, PencilIcon } from "@heroicons/react/solid";
 import { PopupContext } from '../../Context/PopupContext'
 import EditPopup from "../popups/EditPopup";
+import DeletePopup from "../popups/DeletePopup";
 const BlogCard = ({ data,getBlogs }) => {
   const [expanded, setExpanded] = useState(false);
   const { showPopup } = useContext(PopupContext)
@@ -11,6 +12,9 @@ const BlogCard = ({ data,getBlogs }) => {
   const toggleExpansion = () => {
     setExpanded(!expanded);
   };
+  const _handleDelete = () => {
+    showPopup(<DeletePopup id={data.id} />)
+  }
 
   return (
     <div className={`bg-white rounded-lg shadow-lg w-80 mt-2 ${expanded ? "h-auto" : "h-64"}`}>
@@ -28,7 +32,7 @@ const BlogCard = ({ data,getBlogs }) => {
               See More
             </button>
             <div className="flex">
-              <TrashIcon className="h-6 w-6 text-red-500 cursor-pointer" />
+              <TrashIcon onClick={_handleDelete} className="h-6 w-6 text-red-500 cursor-pointer" />
               <PencilIcon onClick={_handleEdit} className="h-6 w-6 text-blue-500 cursor-pointer ml-2" />
             </div>
           </div>

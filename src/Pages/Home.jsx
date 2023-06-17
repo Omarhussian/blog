@@ -3,31 +3,40 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCall } from "../features/api/apiSlice";
 import Layout from "../layout/Layout";
 import BlogCard from "../components/Cards/BlogCard";
+import { useSnackbar } from "notistack";
 
 const Home = () => {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+
   const [blogs, setBlogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
- const getBlogs = () => {
+  const [isLoading, setIsLoading] = useState(true); // Added loading state
+
+  const getBlogs = () => {
+    setIsLoading(true); // Start loading
+
     dispatch(
-        getCall({
-          path: "/posts",
-          body: {
-            /* request body */
-          },
-          headers: {
-            /* headers */
-          },
-          showLoader: true,
-          fallback: null,
-        })
-      ).then((response) => {
-        const responseData = response.payload.resp.data;
-        setBlogs(responseData);
-      });
- }
+      getCall({
+        path: "/posts",
+        body: {
+          /* request body */
+        },
+        headers: {
+          /* headers */
+        },
+        showLoader: true,
+        fallback: null,
+      })
+    ).then((response) => {
+      const responseData = response.payload.resp.data;
+      setBlogs(responseData);
+      setIsLoading(false); // Stop loading when data arrives
+    });
+  };
+
   useEffect(() => {
-    getBlogs()
+    getBlogs();
   }, []);
 
   const handleSearch = (event) => {
@@ -51,16 +60,26 @@ const Home = () => {
             onChange={handleSearch}
             onFocus={(e) => e.target.classList.remove("animate-pulse")}
             onBlur={(e) => e.target.classList.add("animate-pulse")}
-            className="animate-pulse px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-full "
+            className="animate-pulse px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-full"
           />
         </div>
-        <div className="flex grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {filteredBlogs.map((item) => (
-            <div className=" flex justify-center" key={item.id}>
-              <BlogCard data={item} getBlogs={getBlogs} />
+        {isLoading ? ( // Render the loader if still loading
+          <div className="flex justify-center">
+            <div className="loader">
+              {enqueueSnackbar("Loading...", {
+                variant: "warning",
+              })}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="flex grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {filteredBlogs.map((item) => (
+              <div className="flex justify-center" key={item.id}>
+                <BlogCard data={item} getBlogs={getBlogs} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );

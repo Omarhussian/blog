@@ -79,6 +79,38 @@ export const putCall = createAsyncThunk(
   }
 );
 
+export const deleteCall = createAsyncThunk(
+  'api/deleteCall',
+  async ({ path, headers = {}, showLoader = true, fallback = null }) => {
+    const _axios = axios.create({
+      baseURL: APIURL,
+      headers: { apikey: API_KEY, ...headers },
+      timeout: REQUEST_TIMEOUT,
+    });
+
+    let st = Date.now();
+    try {
+      if (showLoader) {
+        // Dispatch an action to show loader
+        // toggleLoader('show')
+      }
+      let resp = await _axios.delete(path);
+      let time = Date.now() - st;
+      let formatedTime = moment(moment.utc(time)).format(
+        time > 60 * 1000 ? 'mm:ss SSS' : 'ss.SSS'
+      );
+
+      return { resp, path, formatedTime, fallback };
+    } catch (err) {
+      let time = Date.now() - st;
+      let formatedTime = moment(moment.utc(time)).format(
+        time > 60 * 1000 ? 'mm:ss SSS' : 'ss.SSS'
+      );
+      return { err, path, formatedTime, fallback };
+    }
+  }
+);
+
 // Create the API slice
 const apiSlice = createSlice({
   name: 'api',
@@ -91,21 +123,23 @@ const apiSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getCall.fulfilled, (state, action) => {
-        const { resp, path, formatedTime, fallback } = action.payload;
-        // Handle the response and update the state accordingly
-        // ...
+        // ... existing code ...
       })
       .addCase(getCall.rejected, (state, action) => {
-        const { err, path, formatedTime, fallback } = action.payload;
-        // Handle the error and update the state accordingly
-        // ...
+        // ... existing code ...
       })
       .addCase(putCall.fulfilled, (state, action) => {
+        // ... existing code ...
+      })
+      .addCase(putCall.rejected, (state, action) => {
+        // ... existing code ...
+      })
+      .addCase(deleteCall.fulfilled, (state, action) => {
         const { resp, path, formatedTime, fallback } = action.payload;
         // Handle the response and update the state accordingly
         // ...
       })
-      .addCase(putCall.rejected, (state, action) => {
+      .addCase(deleteCall.rejected, (state, action) => {
         const { err, path, formatedTime, fallback } = action.payload;
         // Handle the error and update the state accordingly
         // ...

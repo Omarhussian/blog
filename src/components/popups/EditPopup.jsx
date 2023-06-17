@@ -22,8 +22,10 @@ const EditPopup = ({ data, getBlogs }) => {
 
   const handleSave = () => {
     const updatedBlog = {
+      id: data.id,
       title: title,
       body: body,
+      userId: 1,
     };
 
     dispatch(
@@ -34,9 +36,11 @@ const EditPopup = ({ data, getBlogs }) => {
         fallback: null,
       })
     ).then((resp) => {
-      console.log(resp);
+      console.log("REEEEEE", resp);
       if (resp.payload.resp.status === 200) {
         enqueueSnackbar("Success", { variant: "success" });
+        setTitle(resp.payload.resp.data.title);
+        setBody(resp.payload.resp.data.body);
         getBlogs();
         hidePopup();
       } else {
