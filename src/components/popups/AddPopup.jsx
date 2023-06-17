@@ -1,37 +1,35 @@
 import React, { useState, useContext } from "react";
 import { PopupContext } from "../../Context/PopupContext";
-import { putCall, updateBlogs } from "../../features/api/apiSlice";
+import { postCall } from "../../features/api/apiSlice";
 import { useDispatch } from "react-redux";
 import { useSnackbar } from "notistack";
 
-const EditPopup = ({ data, getBlogs }) => {
-  
+const AddPopup = ({ getBlogs }) => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-  const [title, setTitle] = useState(data.title);
-  const [body, setBody] = useState(data.body);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
   const { hidePopup } = useContext(PopupContext);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
-  };  
+  };
 
   const handleBodyChange = (e) => {
     setBody(e.target.value);
   };
 
   const handleSave = () => {
-    const updatedBlog = {
-      id: data.id,
+    const newBlog = {
       title: title,
       body: body,
-      userId: data.userId,
+      userId: 1,
     };
 
     dispatch(
-      putCall({
-        path: `/posts/${data.id}`,
-        body: updatedBlog,
+      postCall({
+        path: "/posts",
+        body: newBlog,
         showLoader: true,
         fallback: null,
       })
@@ -39,13 +37,8 @@ const EditPopup = ({ data, getBlogs }) => {
       .unwrap()
       .then(() => {
         enqueueSnackbar("Success", { variant: "success" });
-        // dispatch(updateBlogs()); 
+
         hidePopup();
-      })
-      .catch((error) => {
-        enqueueSnackbar("Something went wrong. Please try again.", {
-          variant: "error",
-        });
       });
   };
 
@@ -58,7 +51,7 @@ const EditPopup = ({ data, getBlogs }) => {
       className="bg-white rounded-lg shadow-lg p-6 w-full"
       style={{ width: 440 }}
     >
-      <h2 className="text-xl font-semibold mb-4">Edit Card</h2>
+      <h2 className="text-xl font-semibold mb-4">Add Blog</h2>
       <div className="mb-4">
         <label className="block text-gray-700 font-bold mb-2">Title</label>
         <input
@@ -94,4 +87,4 @@ const EditPopup = ({ data, getBlogs }) => {
   );
 };
 
-export default EditPopup;
+export default AddPopup;

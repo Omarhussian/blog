@@ -4,34 +4,32 @@ import { getCall } from "../features/api/apiSlice";
 import Layout from "../layout/Layout";
 import BlogCard from "../components/Cards/BlogCard";
 import { useSnackbar } from "notistack";
-
+import { createAction } from "@reduxjs/toolkit";
+import Pagination from "../components/Pagnation";
+export const updateBlogs = createAction("api/updateBlogs");
 const Home = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
-
-  const [blogs, setBlogs] = useState([]);
+  const blogs = useSelector((state) => state.api.data);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true); // Added loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [blogsPerPage] = useState(10);
 
   const getBlogs = () => {
-    setIsLoading(true); // Start loading
-
+    setIsLoading(true);
     dispatch(
       getCall({
         path: "/posts",
-        body: {
-          /* request body */
-        },
-        headers: {
-          /* headers */
-        },
+        body: {},
+        headers: {},
         showLoader: true,
         fallback: null,
       })
     ).then((response) => {
       const responseData = response.payload.resp.data;
-      setBlogs(responseData);
-      setIsLoading(false); // Stop loading when data arrives
+      dispatch(updateBlogs(responseData));
+      setIsLoading(false);
     });
   };
 
@@ -43,11 +41,16 @@ const Home = () => {
     setSearchTerm(event.target.value);
   };
 
-  const filteredBlogs = blogs.filter(
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
+  const filteredBlogs = currentBlogs.filter(
     (blog) =>
       blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       blog.body.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <Layout>
@@ -63,7 +66,7 @@ const Home = () => {
             className="animate-pulse px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-full"
           />
         </div>
-        {isLoading ? ( // Render the loader if still loading
+        {isLoading ? (
           <div className="flex justify-center">
             <div className="loader">
               {enqueueSnackbar("Loading...", {
@@ -72,13 +75,25 @@ const Home = () => {
             </div>
           </div>
         ) : (
-          <div className="flex grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredBlogs.map((item) => (
-              <div className="flex justify-center" key={item.id}>
-                <BlogCard data={item} getBlogs={getBlogs} />
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="flex grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {filteredBlogs.map((item) => (
+                <div className="flex justify-center" key={item.id}>
+                  <BlogCard data={item} getBlogs={getBlogs} />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center mt-4">
+              {blogs.length > blogsPerPage && (
+                <Pagination
+                  blogsPerPage={blogsPerPage}
+                  totalBlogs={blogs.length}
+                  currentPage={currentPage}
+                  paginate={paginate}
+                />
+              )}
+            </div>
+          </>
         )}
       </div>
     </Layout>
